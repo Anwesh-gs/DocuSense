@@ -27,7 +27,7 @@ DocuSense solves this problem by analyzing document content and automatically or
 </ul>
 <br>
 <h1><b>System Workflow</b></h1><br>
-<p>User selects a folder
+<pre>User selects a folder
         ↓
 Application scans for PDF files
         ↓
@@ -39,15 +39,15 @@ Documents classified by topic
         ↓
 Folders created automatically
         ↓
-Files organized into categories</p>
+Files organized into categories</pre>
 <br>
 
 <h1><b>Tech Stack</b></h1><br>
-<pp>Backend-Java,Spring Boot
+<pre>Backend-Java,Spring Boot
 AI / NLP-Sentence Transformers,FastAPI
 PDF Processing-Apache PDFBox
 Frontend-JavaFX
-Database-PostgreSQL</pp><br>
+Database-PostgreSQL</pre><br>
 
 <h1><b>Future Improvements</b></h1><br>
 <ul>
@@ -58,11 +58,11 @@ Database-PostgreSQL</pp><br>
 </ul>
 
 <h1><b>Target Users</b></h1><br>
-<pp>Students managing academic study materials
+<pre>Students managing academic study materials
 Researchers organizing research papers
 Professionals handling document repositories
-Educational institutions managing digital resources</pp>
-<h1><b>Author: Anwesh G S </b></h1><br>
+Educational institutions managing digital resources</pre>
+<br><h1><b>Author: Anwesh G S </b></h1><br>
 
 
 
