@@ -64,6 +64,68 @@ Professionals handling document repositories
 Educational institutions managing digital resources</pre>
 <br><h1><b>Author: Anwesh G S </b></h1><br>
 
+<h1><b>Folder Structure </b></h1><br>
+<pre>DocuSense/
 
+│
+├── backend/
+│   ├── controllers/
+│   │     FolderController.java
+│   │     SearchController.java
+│   │
+│   ├── services/
+│   │     PdfProcessingService.java
+│   │     ClassificationService.java
+│   │     FolderOrganizationService.java
+│   │
+│   ├── models/
+│   │     Document.java
+│   │     Category.java
+│   │
+│   ├── repository/
+│   │     DocumentRepository.java
+│   │
+│   └── config/
+│         AppConfig.java
+│
+│
+├── ai-service/
+│   ├── embedding_model.py
+│   ├── classifier.py
+│   └── api.py
+│
+│
+├── pdf-processing/
+│   ├── PdfTextExtractor.java
+│   └── TextCleaner.java
+│
+│
+├── folder-manager/
+│   ├── FolderScanner.java
+│   ├── FileMover.java
+│   └── FolderWatcher.java
+│
+│
+├── frontend/
+│   ├── ui/
+│   │     MainDashboard.java
+│   │     FolderSelectionView.java
+│   │     SearchView.java
+│   │
+│   └── styles/
+│         theme.css
+│
+│
+├── database/
+│   └── schema.sql
+│
+│
+├── docs/
+│   ├── architecture.md
+│   └── system_design.md
+│
+│
+├── README.md
+└── .gitignore</pre>
 
 
