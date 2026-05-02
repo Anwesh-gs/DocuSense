@@ -1,30 +1,47 @@
-package com.docusense.model; // This file belongs to the model package
+package com.docusense.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDateTime; // Import this
 
-@Entity // Tells JPA this class maps to a database table
-@Table(name = "documents") // The table will be called "documents" in MySQL
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "documents")
 public class Document {
 
-    @Id // This field is the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto increments ID (1, 2, 3...)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filename; // Stores the PDF filename
+    private String filename;
 
-    @Column(columnDefinition = "LONGTEXT") // Use LONGTEXT because extracted text can be very large
-    private String extractedText; // Stores the cleaned extracted text
+    @JsonIgnore // Don't send extracted text in response - too large
+    @Column(columnDefinition = "LONGTEXT")
+    private String extractedText;
 
-    private LocalDateTime uploadedAt; // Stores when the PDF was uploaded
+    private String category;
 
-    @PrePersist // This method runs automatically before saving to database
+    @JsonIgnore // Don't send embedding in response - too large
+    @Column(columnDefinition = "LONGTEXT")
+    private String embedding;
+
+    private String filePath;
+
+    private LocalDateTime uploadedAt;
+
+    @PrePersist
     public void prePersist() {
-        uploadedAt = LocalDateTime.now(); // Sets upload time to right now
+        uploadedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters - used to get and set each field's value
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -34,6 +51,21 @@ public class Document {
     public String getExtractedText() { return extractedText; }
     public void setExtractedText(String extractedText) { this.extractedText = extractedText; }
 
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getEmbedding() { return embedding; }
+    public void setEmbedding(String embedding) { this.embedding = embedding; }
+
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+
     public LocalDateTime getUploadedAt() { return uploadedAt; }
     public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
+
+    private boolean isDuplicate; // True if this document is a duplicate of another
+
+// Add getter and setter at the bottom
+public boolean isDuplicate() { return isDuplicate; }
+public void setDuplicate(boolean isDuplicate) { this.isDuplicate = isDuplicate; }
 }

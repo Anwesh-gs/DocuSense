@@ -1,14 +1,18 @@
 package com.docusense.service; // This file belongs to the service package
 
-import java.util.ArrayList; // Import our Document model
-import java.util.List; // Import our repository
+import java.io.File; // Import our Document model
+import java.nio.file.Files; // Import our repository
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.docusense.model.Document; // Allows us to create a dynamic list
-import com.docusense.model.DocumentRepository; // Represents a list of items
+import com.docusense.model.Document;
+import com.docusense.model.DocumentRepository;
 
 @Service // Tells Spring this is a service class
 public class DocumentService {
@@ -19,46 +23,96 @@ public class DocumentService {
     @Autowired
     private PdfExtractorService pdfExtractorService; // Extracts text from PDFs
 
-    // Saves a single PDF to the database
-    public Document saveDocument(MultipartFile file) throws Exception {
+    @Autowired
+    private DynamicClassificationService dynamicClassificationService; // AI dynamic categorization
 
-        // Step 1: Extract and clean text from the uploaded PDF
-        String cleanedText = pdfExtractorService.extractText(file);
+    @Autowired
+    private EmbeddingService embeddingService; // Generates AI embeddings for text
 
-        // Step 2: Create a new Document object
-        Document document = new Document();
+    @Autowired
+    private DuplicateDetectionService duplicateDetectionService; // Checks for duplicate PDFs
 
-        // Step 3: Set the filename from the uploaded file
-        document.setFilename(file.getOriginalFilename());
+    // Folder where uploaded PDFs will be stored on the server
+    private static final String UPLOAD_DIR = "uploads/";
 
-        // Step 4: Set the extracted and cleaned text
-        document.setExtractedText(cleanedText);
+public DocumentResult saveDocument(MultipartFile file) throws Exception {
 
-        // Step 5: Save to database and return
-        return documentRepository.save(document);
+    // Step 1: Create uploads folder if it doesn't exist
+    File uploadFolder = new File(UPLOAD_DIR);
+    if (!uploadFolder.exists()) {
+        uploadFolder.mkdirs();
     }
 
-    // Saves multiple PDFs to the database one by one
-    public List<Document> saveAllDocuments(List<MultipartFile> files) throws Exception {
+    // Step 2: Get just the filename without subfolder path
+    // e.g. "demo/gas acknowledgement.pdf" → "gas acknowledgement.pdf"
+    String originalFilename = new File(file.getOriginalFilename()).getName();
+    String filePath = UPLOAD_DIR + originalFilename;
+    Path path = Paths.get(filePath);
+    Files.write(path, file.getBytes());
 
-        // Create an empty list to store all saved documents
-        List<Document> savedDocuments = new ArrayList<>();
+    // Step 3: Extract and clean text from the uploaded PDF
+    String cleanedText = pdfExtractorService.extractText(file);
 
-        // Loop through each uploaded file one by one
+    // Step 4: Dynamically classify using Groq/Llama3
+    String category = dynamicClassificationService.classify(cleanedText);
+
+    // Step 5: Generate AI embedding for duplicate detection
+    String embedding = embeddingService.getEmbedding(cleanedText);
+
+    // Step 6: Create and save the document
+    Document document = new Document();
+    document.setFilename(originalFilename); // ← Fixed here
+    document.setExtractedText(cleanedText);
+    document.setCategory(category);
+    document.setEmbedding(embedding);
+    document.setFilePath(filePath);
+    Document savedDocument = documentRepository.save(document);
+
+// Step 7: Check for duplicates and store result
+String duplicateWarning = null;
+if (embedding != null) {
+    duplicateWarning = duplicateDetectionService.checkDuplicate(
+        embedding,
+        savedDocument.getId()
+    );
+}
+
+// If duplicate found → mark document as duplicate in database
+if (duplicateWarning != null) {
+    savedDocument.setDuplicate(true);
+    documentRepository.save(savedDocument); // Save updated status
+}
+
+return new DocumentResult(savedDocument, duplicateWarning);
+    
+}
+
+    // Saves multiple PDFs one by one
+    public List<DocumentResult> saveAllDocuments(List<MultipartFile> files) throws Exception {
+
+        List<DocumentResult> results = new ArrayList<>();
+
         for (MultipartFile file : files) {
-
-            // Skip empty files to avoid errors
             if (!file.isEmpty()) {
-
-                // Save each file using our existing saveDocument method
-                Document saved = saveDocument(file);
-
-                // Add the saved document to our list
-                savedDocuments.add(saved);
+                results.add(saveDocument(file));
             }
         }
 
-        // Return the list of all saved documents
-        return savedDocuments;
+        return results;
+    }
+
+    // Inner class to hold document and duplicate warning together
+    public static class DocumentResult {
+
+        private Document document;
+        private String duplicateWarning;
+
+        public DocumentResult(Document document, String duplicateWarning) {
+            this.document = document;
+            this.duplicateWarning = duplicateWarning;
+        }
+
+        public Document getDocument() { return document; }
+        public String getDuplicateWarning() { return duplicateWarning; }
     }
 }
