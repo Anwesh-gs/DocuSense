@@ -25,7 +25,7 @@ Upload an entire folder of PDFs. DocuSense reads each document, understands its 
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────┐     HTTP      ┌──────────────────────┐     HTTP     ┌─────────────────────┐
