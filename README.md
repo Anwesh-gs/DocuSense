@@ -28,9 +28,9 @@ Upload an entire folder of PDFs. DocuSense reads each document, understands its 
 ##  Architecture
 
 ```
-┌─────────────────┐     HTTP      ┌──────────────────────┐     HTTP   ┌─────────────────────┐
-│   React Frontend │ ──────────► │  Spring Boot Backend  │ ──────────►│  Python FastAPI AI  |
-│   (Port 3000)   │ ◄──────────  │     (Port 8081)       │ ◄──────────│    Service (8000)   │
+┌─────────────────┐     HTTP    ┌──────────────────────┐     HTTP     ┌─────────────────────┐
+│  React Frontend │ ──────────► │  Spring Boot Backend │ ──────────►  │  Python FastAPI AI  |
+│   (Port 3000)   │ ◄────────── │     (Port 8081)      │ ◄──────────  │    Service (8000)   │
 └─────────────────┘             └──────────────────────┘              └─────────────────────┘
                                            │                                      │
                                            ▼                                      │
